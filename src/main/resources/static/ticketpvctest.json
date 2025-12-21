@@ -1,0 +1,15 @@
+{
+  "ticket": {
+    "subject": "SAMPLE: Venkat",
+    "comment": { "body": "Hello, let's see how you or your agents can easily respond to and solve tickets." },
+    "priority": "normal",
+    "status": "open",
+    "requester": { "name": "Test User", "email": "test.user@example.com" },
+    "assignee_id": 24385359002652,
+    "group_id": 24385295701532,
+    "tags": ["zendesk_accelerated_setup"],
+    "custom_fields": [
+      { "id": 24385313090332, "value": null }
+    ]
+  }
+}
