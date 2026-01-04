@@ -15,9 +15,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.codewithvenkat.demo.Model.Ticket;
+import com.codewithvenkat.demo.Repository.TicketRepository;
+import java.time.LocalDateTime;
 
 @Service
 public class ZendeskService {
+
+    @Autowired(required = false)
+    private TicketRepository ticketRepository;
 
     @Value("${zendesk.url}")
     private String zendeskUrl;
@@ -80,4 +95,34 @@ public class ZendeskService {
             throw new RuntimeException("Failed to create ticket: " + e.getMessage(), e);
         }
     }
+     public Object saveTicketUsingRepository(Map<String, Object> payload) {
+         if (ticketRepository == null) {
+             throw new IllegalStateException("TicketRepository is not available");
+         }
+
+         Map<String, Object> ticketMap = payload;
+         if (payload.containsKey("ticket") && payload.get("ticket") instanceof Map) {
+             ticketMap = (Map<String, Object>) payload.get("ticket");
+         }
+
+         String subject = ticketMap.getOrDefault("subject", "").toString();
+         String description = null;
+         if (ticketMap.containsKey("comment") && ticketMap.get("comment") instanceof Map) {
+             Object body = ((Map<?, ?>) ticketMap.get("comment")).get("body");
+             if (body != null) description = String.valueOf(body);
+         }
+         String requesterEmail = null;
+         if (ticketMap.containsKey("requester") && ticketMap.get("requester") instanceof Map) {
+             Object email = ((Map<?, ?>) ticketMap.get("requester")).get("email");
+             if (email != null) requesterEmail = String.valueOf(email);
+         }
+         if (requesterEmail == null && ticketMap.containsKey("requesterEmail")) {
+             requesterEmail = String.valueOf(ticketMap.get("requesterEmail"));
+         }
+
+         String status = ticketMap.containsKey("status") ? String.valueOf(ticketMap.get("status")) : "new";
+
+         Ticket ticket = new Ticket(subject, description, requesterEmail, status, LocalDateTime.now());
+         return ticketRepository.save(ticket);
+     }
 }

@@ -39,4 +39,15 @@ public class ZendeskController {
         String resp = zendeskService.createTicket(payload);
         return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
+
+
+     @PostMapping("/ticket/repository")
+     public ResponseEntity<Object> createTicketRepository(@RequestBody Map<String, Object> payload) {
+         try {
+             Object saved = zendeskService.saveTicketUsingRepository(payload);
+             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+         } catch (Exception e) {
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(java.util.Collections.singletonMap("error", e.getMessage()));
+         }
+     }
 }
